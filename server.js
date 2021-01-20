@@ -20,13 +20,31 @@ app.get("/", function (req, res) {
 
 
 // your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+
+app.get("/api/timestamp/:date", function (req, res) {
+  const dateFormat = /\d{4}-\d{2}-\d{2}/;
+  const dateString = req.params.date;
+  let timestamp;
+
+  if (!dateString)
+    res.json({error: 'Wrong date format'});
+  
+  if (dateString.match(dateFormat) === null) {
+    timestamp = parseInt(dateString);
+  } else {
+    const [year, month, day] = dateString.split('-');
+    timestamp = Date.UTC(year, month - 1, day);
+  }
+
+  const date = new Date(timestamp);
+
+  res.json({
+    "unix": date.getTime(),
+    "utc": date.toUTCString()
+  });
 });
 
-
-
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
+var listener = app.listen(3000 || process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
