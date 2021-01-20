@@ -20,23 +20,8 @@ app.get("/", function (req, res) {
 
 
 // your first API endpoint... 
-
-app.get("/api/timestamp/:date", function (req, res) {
-  const dateFormat = /\d{4}-\d{2}-\d{2}/;
-  const dateString = req.params.date;
-  let timestamp;
-
-  if (!dateString)
-    res.json({error: 'Wrong date format'});
-  
-  if (dateString.match(dateFormat) === null) {
-    timestamp = parseInt(dateString);
-  } else {
-    const [year, month, day] = dateString.split('-');
-    timestamp = Date.UTC(year, month - 1, day);
-  }
-
-  const date = new Date(timestamp);
+app.get("/api/timestamp/", function (req, res) {
+  const date = new Date();
 
   res.json({
     "unix": date.getTime(),
@@ -44,7 +29,38 @@ app.get("/api/timestamp/:date", function (req, res) {
   });
 });
 
+app.get("/api/timestamp/:date", function (req, res) {
+  const dateFormat = /\d{4}-\d{2}-\d{2}/;
+  const dateString = req.params.date;
+  let date = new Date(dateString);
+
+  if(!isNaN(date.getTime()))
+  {
+    res.json({
+      "unix": date.getTime(),
+      "utc": date.toUTCString()
+    });
+  } else {
+    if (dateString.match(dateFormat) !== null) {
+      const [year, month, day] = dateString.split('-');
+      const timestamp = Date.UTC(year, month - 1, day);
+
+      date = new Date(timestamp);
+    } else {
+      date = new Date(parseInt(dateString));
+    }
+
+    if(isNaN(date.getTime()))
+      res.json({ error : "Invalid Date" });
+    else
+      res.json({
+        "unix": date.getTime(),
+        "utc": date.toUTCString()
+      });
+  }
+});
+
 // listen for requests :)
-var listener = app.listen(3000 || process.env.PORT, function () {
+var listener = app.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
